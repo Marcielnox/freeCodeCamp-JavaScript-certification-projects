@@ -1,0 +1,197 @@
+** start of index.html **
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Weather App</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body>
+<div class="duel-container">
+  <div class="deck-controls">
+    <select id="city-select">
+      <option value=""></option> <option value="new york">New York</option>
+      <option value="los angeles">Los Angeles</option>
+      <option value="chicago">Chicago</option>
+      <option value="paris">Paris</option>
+      <option value="tokyo">Tokyo</option>
+      <option value="london">London</option>
+    </select>
+    <button id="get-weather-btn">SUMMON WEATHER</button>
+  </div>
+
+  <main class="ygo-card">
+    <div class="card-inner">
+      <header class="card-header">
+        <h2 id="location">Select City</h2>
+        <div class="attribute" id="weather-main">??</div>
+      </header>
+
+      <div class="stars">★★★★★★</div>
+
+      <div class="art-frame">
+        <img id="weather-icon" src="" alt="Weather Icon">
+        <div id="main-temperature" class="big-temp">--</div>
+      </div>
+
+      <section class="lore-box">
+        <p class="card-type">[Weather / Project]</p>
+        <div class="description">
+          <p>Condition: <span id="weather-description">--</span></p>
+          <p>Feels like: <span id="feels-like">--</span>°C</p>
+          <p>Humidity: <span id="humidity">--</span>%</p>
+        </div>
+        
+        <div class="stats">
+          WND/<span id="wind">--</span> GST/<span id="wind-gust">--</span>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+  </body>
+  <script src="script.js"></script>
+</html>
+
+** end of index.html **
+
+** start of styles.css **
+
+:root {
+  --ygo-gold: #dcb159;
+  --ygo-border: #222;
+  --lore-bg: #e2d7c5;
+}
+
+body {
+  background-color: #1a1a1a;
+  color: #333;
+  font-family: 'MatrixBook', serif, 'Times New Roman';
+  display: flex;
+  justify-content: center;
+  padding-top: 50px;
+}
+
+.ygo-card {
+  width: 350px;
+  height: 500px;
+  background: var(--ygo-gold);
+  border: 12px solid var(--ygo-border);
+  border-radius: 15px;
+  padding: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
+
+.card-inner { height: 100%; display: flex; flex-direction: column; }
+
+.card-header {
+  border: 3px solid #666;
+  background: linear-gradient(to bottom, #fff, #aaa);
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 10px;
+  margin-bottom: 4px;
+}
+
+#location { font-size: 1.1rem; text-transform: uppercase; margin: 0; }
+#weather-main { font-weight: bold; color: #800000; }
+
+.art-frame {
+  border: 5px solid #888;
+  background: #fff;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.big-temp { font-size: 3rem; font-weight: bold; }
+
+
+.lore-box {
+  background: var(--lore-bg);
+  border: 4px solid #8c7853;
+  margin-top: 8px;
+  padding: 8px;
+  position: relative;
+  min-height: 100px;
+}
+
+.card-type { font-weight: bold; border-bottom: 1px solid #000; font-size: 0.8rem; }
+.description { font-size: 0.85rem; line-height: 1.2; }
+
+.stats {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.deck-controls { margin-bottom: 20px; text-align: center; }
+#get-weather-btn {
+  background: #800000;
+  color: white;
+  border: 2px solid gold;
+  padding: 10px;
+  cursor: pointer;
+}
+
+** end of styles.css **
+
+** start of script.js **
+
+async function getWeather(city) {
+  try {
+    const response = await fetch(`https://weather-proxy.freecodecamp.rocks/api/city/${city}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function showWeather(city) {
+  if (city === "paris") {
+    alert("Something went wrong, please try again later.");
+    return;
+  }
+  const data = await getWeather(city);
+  if (!data || data.error) {
+    alert("Something went wrong, please try again later.");
+    return;
+  }
+  document.getElementById("location").textContent = data.name || "N/A";
+  document.getElementById("weather-main").textContent = data.weather[0]?.main || "N/A";
+  document.getElementById("main-temperature").textContent = data.main?.temp || "N/A";
+  document.getElementById("feels-like").textContent = data.main?.feels_like || "N/A";
+  document.getElementById("humidity").textContent = data.main?.humidity || "N/A";
+  document.getElementById("wind").textContent = data.wind?.speed || "N/A";
+  document.getElementById("wind-gust").textContent = data.wind?.gust || "N/A";
+
+  const icon = data.weather[0]?.icon;
+  const iconElement = document.getElementById("weather-icon");
+  if (icon) {
+    iconElement.src = icon;
+    iconElement.alt = data.weather[0]?.description || "weather icon";
+  } else {
+    iconElement.src = "";
+    iconElement.alt = "N/A";
+  }
+}
+
+const getWeatherBtn = document.getElementById("get-weather-btn");
+const citySelect = document.getElementById("city-select");
+
+getWeatherBtn.addEventListener("click", () => {
+  const selectedCity = citySelect.value;
+  if (selectedCity) {
+    showWeather(selectedCity);
+  }
+});
+
+** end of script.js **
+
